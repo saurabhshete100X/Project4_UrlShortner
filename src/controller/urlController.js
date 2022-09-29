@@ -1,10 +1,10 @@
 const validUrl = require('valid-url')
 const shortid = require('shortid')
-const isValid = require('../validations/validation')
+//const isValid = require('../validations/validation')
 const urlModel = require('../models/urlModel')
 const Url = require('../models/urlModel')
 
-const baseUrl = 'http:localhost:3000'
+const baseUrl = 'http://localhost:3000/'
 const urlRegex = (value) => {                                  //  USING THIS REGEX TO VALIDATE URL PATTERN
     let urlRegex = /^(?:(?:(?:https?|http):)?\/\/.*\.(?:png|gif|webp|com|in|org|co|co.in|net|jpeg|jpg))/i;
     if (urlRegex.test(value))
@@ -39,10 +39,10 @@ if (Object.keys(data).length == 0) {
 //       }
 
 
+//"http://localhost:3000/"
 
-
-let urlCode = shortid.generate().toLowerCase()
-let shortUrl = "http://localhost:3000/"+urlCode
+let urlCode = shortid.generate().toLocaleLowerCase()
+let shortUrl = baseUrl+urlCode
 data.urlCode= urlCode
 data.shortUrl = shortUrl
 await urlModel.create(data)
