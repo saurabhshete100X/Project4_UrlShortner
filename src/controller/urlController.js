@@ -2,9 +2,10 @@ const validUrl = require('valid-url')
 const shortid = require('shortid')
 //const isValid = require('../validations/validation')
 const urlModel = require('../models/urlModel')
-const Url = require('../models/urlModel')
+//const Url = require('../models/urlModel')
 
 const baseUrl = 'http://localhost:3000/'
+
 const urlRegex = (value) => {                                  //  USING THIS REGEX TO VALIDATE URL PATTERN
     let urlRegex = /^(?:(?:(?:https?|http):)?\/\/.*\.(?:png|gif|webp|com|in|org|co|co.in|net|jpeg|jpg))/i;
     if (urlRegex.test(value))
