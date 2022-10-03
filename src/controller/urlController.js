@@ -53,21 +53,21 @@ const createUrl = async function (req, res) {
     }
 
 
-    const isValid= function (value) {
-        if (typeof value === 'undefined' || value === null) return false
-        if (typeof value === 'string' && value.trim().length === 0) return false
-        return true
+    const isValid = function (value) {
+      if (typeof value === 'undefined' || value === null) return false
+      if (typeof value === 'string' && value.trim().length === 0) return false
+      return true
     }
 
-     if(!isValid(data.longUrl)){
-        return res.status(400).send({status: false, message: "Data should be in string"})
-     }
+    if (!isValid(data.longUrl)) {
+      return res.status(400).send({ status: false, message: "Data should be in string" })
+    }
 
 
     if (!urlRegex(data.longUrl))
       return res.status(400).send({ status: false, message: "Wrong Url" });
 
-    
+
     // let validurl = isValid.isValidUrl(data)
     //     if (validurl) {
     //         return res.status(400).send({ status: false, message: validurl})
@@ -98,35 +98,32 @@ const createUrl = async function (req, res) {
 const getUrl = async function (req, res) {
   try {
     // find a document match to the code in req.params.code
-    const url = await urlModel.findOne({
-      urlCode: req.params.urlCode,
-    });
-    if (url) {
-      // when valid we perform a redirect
-      return res.redirect(url.longUrl);
-    } else {
-      // else return a not found 404 status
-      return res.status(404).send({ status: false, message: "No URL Found" });
+    let urlCode=req.params.urlCode
+    let cahcedLinkData = await GET_ASYNC(urlCode)
+    if (cahcedLinkData) {
+      cahcedLinkData = JSON.parse(cahcedLinkData)
+      console.log(cahcedLinkData)
+      return res.redirect(cahcedLinkData.longUrl)
     }
-  } catch (err) {
+    else{
+    const url = await urlModel.findOne({ urlCode:urlCode }).select({longUrl:1});
+    //validation
+    await SET_ASYNC(urlCode, JSON.stringify(url))
+   return res.redirect({ data: url });
+    
+  }
+}
+
+  catch (err) {
     // exception handler
     console.error(err);
     res.status(500).send({ status: false, message: "Server Error" });
   }
-};
-const fetchShortUrl= async function (req, res) {
-  let cahcedLinkData = await GET_ASYNC(`${req.params.urlCode}`)
-cahcedLinkData=JSON.parse(cahcedLinkData)
-  if(cahcedLinkData) {
-    res.send(cahcedLinkData)
-  } else {
-    let fullUrl = await urlModel.findByOne({urlCode: req.params.urlCode});
-    await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(fullUrl))
-    res.send({ data:fullUrl});
-  }
-  
-};
+}
+
+
+
 
 module.exports.createUrl = createUrl;
 module.exports.getUrl = getUrl;
-module.exports.fetchShortUrl = fetchShortUrl;
+
