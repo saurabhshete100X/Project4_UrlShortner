@@ -1,8 +1,29 @@
 const validUrl = require("valid-url");
 const shortid = require("shortid");
+const redis = require("redis");
+
+const { promisify } = require("util");
 
 const urlModel = require("../models/urlModel");
 //const Url = require('../models/urlModel')
+
+const redisClient = redis.createClient(
+  13976,//port
+  "redis-13976.c212.ap-south-1-1.ec2.cloud.redislabs.com",//ip address
+  { no_ready_check: true }
+);
+redisClient.auth("ooNQopKCz1I0vcZbxchS2EpLz7pAQNEE", function (err) {
+  if (err) throw err;
+});
+
+redisClient.on("connect", async function () {
+  console.log("Connected to Redis..");
+});
+
+
+const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
+const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
+
 
 const baseUrl = "http://localhost:3000/";
 
@@ -93,6 +114,19 @@ const getUrl = async function (req, res) {
     res.status(500).send({ status: false, message: "Server Error" });
   }
 };
+const fetchShortUrl= async function (req, res) {
+  let cahcedLinkData = await GET_ASYNC(`${req.params.urlCode}`)
+cahcedLinkData=JSON.parse(cahcedLinkData)
+  if(cahcedLinkData) {
+    res.send(cahcedLinkData)
+  } else {
+    let fullUrl = await urlModel.findByOne({urlCode: req.params.urlCode});
+    await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(fullUrl))
+    res.send({ data:fullUrl});
+  }
+  
+};
 
 module.exports.createUrl = createUrl;
 module.exports.getUrl = getUrl;
+module.exports.fetchShortUrl = fetchShortUrl;
