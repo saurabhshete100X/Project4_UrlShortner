@@ -5,13 +5,14 @@ const redis = require("redis");
 const { promisify } = require("util");
 
 const urlModel = require("../models/urlModel");
-//const Url = require('../models/urlModel')
+
 
 const redisClient = redis.createClient(
   13976,//port
   "redis-13976.c212.ap-south-1-1.ec2.cloud.redislabs.com",//ip address
   { no_ready_check: true }
 );
+
 redisClient.auth("ooNQopKCz1I0vcZbxchS2EpLz7pAQNEE", function (err) {
   if (err) throw err;
 });
@@ -67,13 +68,6 @@ const createUrl = async function (req, res) {
     if (!urlRegex(data.longUrl))
       return res.status(400).send({ status: false, message: "Wrong Url" });
 
-
-    // let validurl = isValid.isValidUrl(data)
-    //     if (validurl) {
-    //         return res.status(400).send({ status: false, message: validurl})
-    //       }
-
-    //"http://localhost:3000/"
     let permanentUrl = await urlModel
       .findOne({ longUrl: data.longUrl })
       .select({ createdAt: 0, updatedAt: 0, __v: 0, _id: 0 });
@@ -98,29 +92,26 @@ const createUrl = async function (req, res) {
 const getUrl = async function (req, res) {
   try {
     // find a document match to the code in req.params.code
-    let urlCode=req.params.urlCode
-    let cahcedLinkData = await GET_ASYNC(urlCode)
-    if (cahcedLinkData) {
-      cahcedLinkData = JSON.parse(cahcedLinkData)
-      console.log(cahcedLinkData)
-      return res.redirect(cahcedLinkData.longUrl)
+    let urlCode = req.params.urlCode                // urlCode
+    let cachedLinkData = await GET_ASYNC(urlCode)  // Check On Caching Server
+
+    if (cachedLinkData) {                        // if we found data in cachedLinkData then simply redirected.
+      console.log(cachedLinkData)
+      return res.status(302).redirect(cachedLinkData)
     }
-    else{
-    const url = await urlModel.findOne({ urlCode:urlCode }).select({longUrl:1});
-    //validation
-    await SET_ASYNC(urlCode, JSON.stringify(url))
-   return res.redirect({ data: url });
-    
+    else {
+      const url = await urlModel.findOne({ urlCode })
+      if (!url) return res.status(404).send({ status: false, message: "url not found" })
+      await SET_ASYNC(urlCode, url.longUrl)
+      return res.status(302).redirect(url.longUrl);
+    }
   }
-}
 
   catch (err) {
-    // exception handler
     console.error(err);
     res.status(500).send({ status: false, message: "Server Error" });
   }
 }
-
 
 
 
