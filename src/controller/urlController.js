@@ -1,23 +1,22 @@
-const validUrl = require("valid-url");
+//const validUrl = require("valid-url");
 const shortid = require("shortid");
 const redis = require("redis");
 
-const { promisify } = require("util");
-
+const  {promisify} = require("util");//util is a package & promisify is its one of the function.
 const urlModel = require("../models/urlModel");
 
 
 const redisClient = redis.createClient(
-  13976,//port
-  "redis-13976.c212.ap-south-1-1.ec2.cloud.redislabs.com",//ip address
+  17983,//port
+  "redis-17983.c212.ap-south-1-1.ec2.cloud.redislabs.com",//ip address
   { no_ready_check: true }
 );
 
-redisClient.auth("ooNQopKCz1I0vcZbxchS2EpLz7pAQNEE", function (err) {
+redisClient.auth("3pLDCvebl3GLDREqI9yoALqNaxt9dbHF", function (err) {
   if (err) throw err;
 });
 
-redisClient.on("connect", async function () {
+redisClient.on("connect", async function () {//to connect
   console.log("Connected to Redis..");
 });
 
@@ -61,7 +60,7 @@ const createUrl = async function (req, res) {
     }
 
     if (!isValid(data.longUrl)) {
-      return res.status(400).send({ status: false, message: "Data should be in string" })
+      return res.status(400).send({ status: false, message: "URL should be in string" })
     }
 
 
@@ -78,6 +77,8 @@ const createUrl = async function (req, res) {
       data.urlCode = urlCode;
       data.shortUrl = shortUrl;
       await urlModel.create(data);
+      await SET_ASYNC(`${data.longUrl}`, JSON.stringify(data))
+
       res.status(201).send({ status: true, data: data });
     } else {
       return res
@@ -96,7 +97,7 @@ const getUrl = async function (req, res) {
     let cachedLinkData = await GET_ASYNC(urlCode)  // Check On Caching Server
 
     if (cachedLinkData) {                        // if we found data in cachedLinkData then simply redirected.
-      console.log(cachedLinkData)
+     // console.log(cachedLinkData)
       return res.status(302).redirect(cachedLinkData)
     }
     else {
