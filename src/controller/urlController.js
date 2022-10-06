@@ -67,6 +67,8 @@ const createUrl = async function (req, res) {
     if (!urlRegex(data.longUrl))
       return res.status(400).send({ status: false, message: "Wrong Url" });
 
+
+      
       const cachedData= await GET_ASYNC(`${data.longUrl}`)
       if(cachedData){
         return res
@@ -108,7 +110,7 @@ const createUrl = async function (req, res) {
 };
 
 
-//*******************GET API********************************** */
+//*************************GET API********************************** */
 
 const getUrl = async function (req, res) {
   try {
@@ -145,4 +147,3 @@ const getUrl = async function (req, res) {
 
 module.exports.createUrl = createUrl;
 module.exports.getUrl = getUrl;
-
