@@ -13,7 +13,7 @@ mongoose.connect("mongodb+srv://NehaVerma009:A9CEHRbpunBJ90to@cluster0.r6xdcuv.m
 
 
 app.use(bodyParser.json()); 
-app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/', route);
 
