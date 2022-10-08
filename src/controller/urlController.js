@@ -71,9 +71,10 @@ const createUrl = async function (req, res) {
       
       const cachedData= await GET_ASYNC(`${data.longUrl}`)
       if(cachedData){
+        let data = JSON.parse(cachedData)
         return res
         .status(200)
-        .send({ status: true, message: "Data from cache", data: JSON.parse(cachedData) });
+        .send({ status: true, message: "Data from cache", data: data });
       }
 
 
@@ -82,7 +83,7 @@ const createUrl = async function (req, res) {
       .select({ createdAt: 0, updatedAt: 0, __v: 0, _id: 0 });
 
       if(permanentUrl){
-        await SETEX_ASYNC(`${data.longUrl}`,10,JSON.stringify(data.longUrl)) //setting in cache 
+        await SETEX_ASYNC(`${data.longUrl}`,10,JSON.stringify(permanentUrl)) //setting in cache 
       return res
       .status(200)
       .send({ status: true, message: "Data from DB", data: permanentUrl });
